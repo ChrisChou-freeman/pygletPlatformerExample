@@ -19,3 +19,4 @@ class Rectangle(NamedTuple):
     y: int
     width: int
     height: int
+

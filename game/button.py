@@ -1,3 +1,5 @@
+from typing import Callable
+
 from pyglet.image import Texture
 from pyglet.sprite import Sprite
 from pyglet.graphics import Batch, OrderedGroup
@@ -18,9 +20,14 @@ class Button(Sprite):
     def get_rec(self) -> Rectangle:
         return Rectangle(self.x, self.y, self.width, self.height)
 
-    def on_hover(self, point: Point) -> bool:
+    def _on_hover(self, point: Point) -> bool:
         rec = self.get_rec()
-        return point.x >= rec.x and point.x <= (rec.x + rec.width) and point.y >= rec.y and point.y <= (rec.y + rec.width)
+        return point.x >= rec.x \
+                and point.x <= (rec.x + rec.width) \
+                and point.y >= rec.y \
+                and point.y <= (rec.y + rec.width)
 
-    def on_click(self) -> None:
-        self.in_select = True
+    def on_click(self, point: Point, call_fuc: Callable) -> None:
+        if not self._on_hover(point):
+            return
+        call_fuc()

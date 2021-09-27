@@ -1,4 +1,4 @@
-from pyglet.window import key
+from pyglet.window import key, mouse
 
 
 def key_up(input_key: int) -> bool:
@@ -18,3 +18,6 @@ def key_enter(input_key: int) -> bool:
 
 def key_back(input_key: int) -> bool:
     return input_key == key.ESCAPE
+
+def mouse_left(mouse_key: int) -> bool:
+    return mouse_key == mouse.LEFT

@@ -57,3 +57,4 @@ if __name__ == '__main__':
             settings.SCREEN_HEIGHT,
             settings.GAME_NAME)
     game.run()
+
