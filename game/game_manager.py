@@ -20,6 +20,10 @@ class GameManager(ABC):
         pass
 
     @abstractmethod
+    def on_mouse_release(self, x: int, y: int, button: int) -> None:
+        pass
+
+    @abstractmethod
     def on_key_press(self, key: int) -> None:
         pass
 

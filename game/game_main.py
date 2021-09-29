@@ -1,6 +1,5 @@
 from typing import List
 
-# from pyglet import resource, sprite
 from pyglet.graphics import OrderedGroup
 from pyglet.window import mouse
 from pyglet import resource
@@ -18,7 +17,7 @@ class GameMain(GameManager):
         self.menu_list: List[Menu] = []
         self.menu_texts = ['Exit', 'Development', 'Game Start']
         self.content_path = 'content/main'
-        self.menu_start = int(settings.SCREEN_HEIGHT/3)
+        self.menu_start = int(settings.SCREEN_HEIGHT/4)
         self.menu_index = len(self.menu_texts) - 1
         self.menu_gap = 50
         self.cloud_speed = 5
@@ -73,6 +72,9 @@ class GameMain(GameManager):
             if menu.on_hover(Point(x, y)) and mouse_left:
                 menu.on_selected()
 
+    def on_mouse_release(self, *_) -> None:
+        pass
+
     def on_key_press(self, key: int) -> None:
         if key_up(key):
             self.menu_index += 1
@@ -110,3 +112,4 @@ class GameMain(GameManager):
     def dispose(self):
         for s in self.sprite_list:
             s.delete()
+

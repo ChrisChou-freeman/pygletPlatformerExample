@@ -28,6 +28,9 @@ class Game(Window):
     def on_mouse_press(self, x: int, y: int, button: int, _) -> None:
         self.game_model.on_mouse_press(x, y, button)
 
+    def on_mouse_release(self, x: int, y: int, button: int, _) -> None:
+        self.game_model.on_mouse_release(x, y, button)
+
     def on_key_press(self, key: int, _) -> None:
         self.game_model.on_key_press(key)
 

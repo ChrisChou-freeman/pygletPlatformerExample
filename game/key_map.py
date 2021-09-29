@@ -19,5 +19,8 @@ def key_enter(input_key: int) -> bool:
 def key_back(input_key: int) -> bool:
     return input_key == key.ESCAPE
 
+def key_grid(input_key: int) -> bool:
+    return input_key == key.G
+
 def mouse_left(mouse_key: int) -> bool:
     return mouse_key == mouse.LEFT
