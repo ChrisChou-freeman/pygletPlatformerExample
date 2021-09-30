@@ -20,3 +20,7 @@ class Rectangle(NamedTuple):
     width: int
     height: int
 
+class MouseKey(NamedTuple):
+    x: int
+    y: int
+    mouse_key: int

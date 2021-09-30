@@ -1,15 +1,17 @@
 import os
-from typing import List, Union
+import json
+from typing import List, Union, Dict
 
 from pyglet.graphics import OrderedGroup
 from pyglet.image import Texture
 from pyglet import resource, shapes
 
 from . import key_map
+from . import tools
 from .game_manager import GameManager
 from .button import Button
 from .sprite import MySprite as Sprite
-from .common_type import Point
+from .common_type import Point, MouseKey
 import settings
 
 class LevelEditor(GameManager):
@@ -20,14 +22,23 @@ class LevelEditor(GameManager):
         self.contaner_height = 150
         self.scroll_speed = 2
         self.surface_layer_width = 0
+        self.globle_scroll_value = 0
         self.layer_list: List[Sprite] = []
         self.tile_btn_list: List[Button] = []
         self.key_hold: List[int] = []
-        self.mouse_key_hold: List[int] =[]
+        self.mouse_key_hold: List[MouseKey] =[]
         self.grid_line_list: List[shapes.Line] = []
+
+        # level data
+        self.tile_data: List[Dict[str, int]] = []
+        self.collistion_data: Dict[str, int] = {}
+        self.level_info: Dict[str, int] = {}
+        #
+
         self.game_start_path = 'content/gamestart'
         self.btn_path = 'content/button'
         self.tiles_path = 'content/tiles'
+        self.level_path = 'content/leveldata'
         self.open_tile_btn: Union[Button, None] = None
         self.btn_container: Union[shapes.Rectangle, None] = None
         self.map_group = OrderedGroup(self.layer_number)
@@ -60,6 +71,13 @@ class LevelEditor(GameManager):
                 group=self.ui_group,
                 color=settings.COLOR_GREY[0:3])
         self.btn_container.visible = False
+
+    def _load_level_data(self) -> None:
+        level_json = resource.text(f'{self.current_level}.json')
+        json_obj = json.loads(level_json.text)
+        self.tile_data = json_obj.get("TileData", [])
+        self.collistion_data = json_obj.get("CollisionData", {})
+        self.level_info = json_obj.get("LevelInfo", {})
 
     def _load_tile_menu(self) -> None:
         tile_border = 15
@@ -123,13 +141,18 @@ class LevelEditor(GameManager):
             self.grid_line_list.append(new_line)
 
     def load_content(self) -> None:
-        resource.path = [self.game_start_path, self.btn_path, self.tiles_path]
+        resource.path = [
+                self.game_start_path,
+                self.btn_path,
+                self.tiles_path,
+                self.level_path]
         resource.reindex()
         self._load_layers()
         self._load_button()
         self._load_container()
         self._load_tile_menu()
         self._load_grid()
+        self._load_level_data()
 
     def _handle_scroll(self, direction: str) -> None:
         border_left = self.layer_list[self.layer_number-1].x >= 0
@@ -161,6 +184,11 @@ class LevelEditor(GameManager):
                 l.x -= surface_layer_scroll_speed
                 l.x2 -= surface_layer_scroll_speed
 
+        if direction == 'left':
+            self.globle_scroll_value -= surface_layer_scroll_speed
+        else:
+            self.globle_scroll_value += surface_layer_scroll_speed
+
     def _show_grid(self) -> None:
         for l in self.grid_line_list:
             l.visible = True if not l.visible else False
@@ -176,15 +204,20 @@ class LevelEditor(GameManager):
                     return
 
             for index, button in enumerate(self.tile_btn_list):
-                if button._on_hover(Point(x, y)):
+                if button.on_hover(Point(x, y)):
                     self.in_select_tile = index
 
-            self.mouse_key_hold.append(mouse_key)
+            self.mouse_key_hold.append(MouseKey(x, y, mouse_key))
 
     def on_mouse_release(self, *args) -> None:
         mouse_key = args[-1]
-        if mouse_key in self.mouse_key_hold:
-            self.mouse_key_hold.remove(mouse_key)
+        need_remove_index = -2
+        for index, mkey in enumerate(self.mouse_key_hold):
+            if mouse_key == mkey.mouse_key:
+                need_remove_index = index
+
+        if need_remove_index != -2:
+            del self.mouse_key_hold[need_remove_index]
 
     def on_key_press(self, key: int) -> None:
         if key_map.key_left(key) or key_map.key_right(key):
@@ -200,6 +233,15 @@ class LevelEditor(GameManager):
         if key in self.key_hold:
             self.key_hold.remove(key)
 
+    def _on_draw_tile(self, k: MouseKey) -> None:
+        if self.btn_container != None \
+                and self.btn_container.visible\
+                and tools.rec_contain_poi(self.btn_container, Point(k.x, k.y))\
+                and self.open_tile_btn != None\
+                and not self.open_tile_btn.on_hover(Point(k.x, k.y)):
+            return
+        print((k.x + self.globle_scroll_value)//settings.TILE_WIDTH, '--', k.y//settings.TILE_HEIGHT)
+
     def update(self, _) -> None:
         for k in self.key_hold:
             if key_map.key_left(k):
@@ -207,6 +249,10 @@ class LevelEditor(GameManager):
 
             elif key_map.key_right(k):
                 self._handle_scroll('right')
+
+        for k in self.mouse_key_hold:
+            if key_map.mouse_left(k.mouse_key):
+                self._on_draw_tile(k)
 
         for index, button in enumerate(self.tile_btn_list):
             if index == self.in_select_tile \

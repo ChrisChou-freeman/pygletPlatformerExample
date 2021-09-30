@@ -24,7 +24,7 @@ class Button(Sprite):
     def get_rec(self) -> Rectangle:
         return Rectangle(self.x, self.y, self.width, self.height)
 
-    def _on_hover(self, point: Point) -> bool:
+    def on_hover(self, point: Point) -> bool:
         rec = self.get_rec()
         return point.x >= rec.x \
                 and point.x <= (rec.x + rec.width) \
@@ -42,7 +42,7 @@ class Button(Sprite):
         self.select_box = []
 
     def on_click(self, point: Point, call_fuc: Callable) -> bool:
-        if not self._on_hover(point):
+        if not self.on_hover(point):
             return False
         call_fuc()
         return True
