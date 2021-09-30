@@ -10,7 +10,7 @@
 pip install pdm
 cd pygletPlatformerExample
 pdm install         # install game dependence in current folder
-pdm run start				# start game
-pdm run build_ext		# build executable file for game
+pdm run start       # start game
+pdm run build_ext   # build executable file for game
 ```
 
